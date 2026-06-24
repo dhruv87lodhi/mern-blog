@@ -9,16 +9,48 @@ import Profile from "./pages/Profile";
 import CreatePost from "./pages/CreatePost";
 import EditPost from "./pages/EditPost";
 import SinglePost from "./pages/SinglePost";
+import Loading from "./components/Loading";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useEffect, useState } from "react";
+import authService from "./services/authService";
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    checkAuth();
+  }, [])
+
+  async function checkAuth() {
+    if(localStorage.getItem("token")){
+      setUser(null);
+      return;
+    }
+    try {
+      setLoading(true);
+      user = await authService.getMe();
+      setUser(user);
+    } catch (error) {
+      localStorage.setItem("token", "");
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if(loading) {
+    return <Loading />;
+  }
+  
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login setUser={setUser} />} />
+      <Route path="/register" element={<Register setUser={setUser} />} />
 
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
+      <Route element={<MainLayout user={user} />}>
+        <Route path="/" element={<Home user={user} />} />
+        <Route path="/profile" element={<ProtectedRoute user={user}><Profile user={user} /></ProtectedRoute>} />
         <Route path="/create-post" element={<CreatePost />} />
         <Route path="/posts/:id" element={<SinglePost />} />
         <Route path="/edit-post/:id" element={<EditPost />} />
