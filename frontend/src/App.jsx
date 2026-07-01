@@ -16,21 +16,21 @@ import authService from "./services/authService";
 
 function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkAuth();
   }, [])
 
   async function checkAuth() {
-    if(localStorage.getItem("token")){
+    if (!localStorage.getItem("token")) {
       setUser(null);
+      setLoading(false);
       return;
     }
     try {
-      setLoading(true);
-      user = await authService.getMe();
-      setUser(user);
+      const userData = await authService.getMe();
+      setUser(userData.user);
     } catch (error) {
       localStorage.setItem("token", "");
       setUser(null);
@@ -51,9 +51,9 @@ function App() {
       <Route element={<MainLayout user={user} />}>
         <Route path="/" element={<Home user={user} />} />
         <Route path="/profile" element={<ProtectedRoute user={user}><Profile user={user} /></ProtectedRoute>} />
-        <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/create-post" element={<ProtectedRoute user={user}><CreatePost /></ProtectedRoute>} />
         <Route path="/posts/:id" element={<SinglePost />} />
-        <Route path="/edit-post/:id" element={<EditPost />} />
+        <Route path="/edit-post/:id" element={<ProtectedRoute user={user}><EditPost /></ProtectedRoute>} />
       </Route>
     </Routes>
   );

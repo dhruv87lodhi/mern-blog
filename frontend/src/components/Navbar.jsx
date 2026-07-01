@@ -1,18 +1,35 @@
 import { Link } from "react-router-dom";
 
-function Navbar() {
+function Navbar({ user }) {
   return (
-    <nav>
-      <Link to="/">miniBlog</Link>
+    <nav className="flex justify-between items-center p-4 border-b">
 
-      <div className="space-x-5">
+      <Link to="/">
+        BlogNest
+      </Link>
+
+      <div className="flex gap-4 items-center">
+
         <Link to="/">Home</Link>
 
-        <Link to="/profile">Profile</Link>
+        {user ? (
+          <>
+            <Link to="/create-post">
+              Create Post
+            </Link>
 
-        <Link to="/login">Login</Link>
+            <Link to="/profile">
+              {user.name}
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
 
-        <Link to="/register">Register</Link>
+            <Link to="/register">Register</Link>
+          </>
+        )}
+
       </div>
     </nav>
   );
